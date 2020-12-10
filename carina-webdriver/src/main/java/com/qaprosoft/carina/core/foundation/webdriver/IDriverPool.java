@@ -18,8 +18,6 @@ package com.qaprosoft.carina.core.foundation.webdriver;
 import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -57,8 +54,6 @@ import com.qaprosoft.carina.core.foundation.utils.Configuration;
 import com.qaprosoft.carina.core.foundation.utils.Configuration.Parameter;
 import com.qaprosoft.carina.core.foundation.utils.R;
 import com.qaprosoft.carina.core.foundation.utils.common.CommonUtils;
-import com.qaprosoft.carina.core.foundation.utils.ftp.FtpUtils;
-import com.qaprosoft.carina.core.foundation.utils.video.VideoAnalyzer;
 import com.qaprosoft.carina.core.foundation.webdriver.TestPhase.Phase;
 import com.qaprosoft.carina.core.foundation.webdriver.core.factory.DriverFactory;
 import com.qaprosoft.carina.core.foundation.webdriver.device.Device;
@@ -392,38 +387,6 @@ public interface IDriverPool {
             // stop timer to be able to track mobile app session time. It should be started on createDriver!
             Timer.stop(carinaDriver.getDevice().getMetricName(), carinaDriver.getName() + carinaDriver.getDevice().getName());
             
-            
-            // Upload video artifacts if any
-            //IMPORTANT! DON'T MODIFY FILENAME WITHOUT UPDATING DRIVER FACTORIES AND LISTENERS!
-            String fileName = String.format(SpecialKeywords.DEFAULT_VIDEO_FILENAME, sessionId.toString());
-            String filePath = ReportContext.getArtifactsFolder().getAbsolutePath() + File.separator + fileName;
-            
-            File videoFile = new File(filePath); 
-            
-            if (VideoAnalyzer.isVideoUploadEnabled() && videoFile.exists()) {
-                POOL_LOGGER.debug("Upload video is enabled.");
-                //TODO: replace by Zafira call which can upload to ftp or s3 based on configuration
-                CompletableFuture.runAsync(() -> {
-                    POOL_LOGGER.debug("Uploading in async mode started in thread ID: " + Thread.currentThread().getId());
-                    POOL_LOGGER.debug("Screen record ftp: " + R.CONFIG.get("screen_record_ftp"));
-                    String ftpUrl = R.CONFIG.get("screen_record_ftp").replace("%", "");
-                    URI ftpUri = null;
-                    try {
-                        ftpUri = new URI(ftpUrl);
-                    } catch (URISyntaxException e1) {
-                        POOL_LOGGER.error("Incorrect URL format for screen record ftp parameter");
-                    }
-                    if (null != ftpUri) {
-                        String ftpHost = ftpUri.getHost();
-                        FtpUtils.uploadFile(ftpHost, R.CONFIG.get("screen_record_user"), R.CONFIG.get("screen_record_pass"), filePath,
-                                fileName);
-                    } else {
-                        POOL_LOGGER.error("The video won't be uploaded due to incorrect ftp or video recording parameters");
-                    }
-
-                });
-            }
-
         } catch (WebDriverException e) {
             POOL_LOGGER.debug("Error message detected during driver quit: " + e.getMessage(), e);
             // do nothing

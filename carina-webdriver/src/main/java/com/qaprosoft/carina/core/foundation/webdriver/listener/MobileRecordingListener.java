@@ -15,22 +15,17 @@
  *******************************************************************************/
 package com.qaprosoft.carina.core.foundation.webdriver.listener;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Base64;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.remote.Command;
 import org.openqa.selenium.remote.CommandExecutor;
 import org.openqa.selenium.remote.DriverCommand;
 
-import com.qaprosoft.carina.core.foundation.commons.SpecialKeywords;
-import com.qaprosoft.carina.core.foundation.report.ReportContext;
+import com.qaprosoft.carina.core.foundation.utils.R;
 
 import io.appium.java_client.MobileCommand;
 import io.appium.java_client.screenrecording.BaseStartScreenRecordingOptions;
 import io.appium.java_client.screenrecording.BaseStopScreenRecordingOptions;
+import io.appium.java_client.screenrecording.ScreenRecordingUploadOptions;
 
 /**
  * ScreenRecordingListener - starts/stops video recording for Android and IOS
@@ -62,41 +57,21 @@ public class MobileRecordingListener<O1 extends BaseStartScreenRecordingOptions,
 	public void beforeEvent(Command command) {
 		if (recording) {
 			if (DriverCommand.QUIT.equals(command.getName())) {
-			    //TODO: remove uploading video recording by carina to FTP. Appium should do it on it's own
-			    
-			    // stop video recording and publish it to local artifacts
-			    String data = "";
                 try {
-                    LOGGER.debug("Stopping mobile video recording and upload data locally for " + command.getSessionId());
-                    data = commandExecutor
+                    String sessionId = command.getSessionId().toString();
+                    LOGGER.debug("Stopping mobile video recording and upload data locally for " + sessionId);
+                    stopRecordingOpt.withUploadOptions(new ScreenRecordingUploadOptions()
+                            .withRemotePath(String.format(R.CONFIG.get("screen_record_ftp"), "artifacts/test-sessions/" + sessionId + "/video.mp4"))
+                            .withAuthCredentials(R.CONFIG.get("screen_record_user"), R.CONFIG.get("screen_record_pass")));
+                    
+                    commandExecutor
                             .execute(new Command(command.getSessionId(), MobileCommand.STOP_RECORDING_SCREEN,
                                     MobileCommand.stopRecordingScreenCommand(
-                                            (BaseStopScreenRecordingOptions) stopRecordingOpt).getValue()))
-                            .getValue().toString();
+                                            (BaseStopScreenRecordingOptions) stopRecordingOpt).getValue()));
                     
-                    LOGGER.debug("Stopped mobile video recording and uploaded data locally for " + command.getSessionId());
+                    LOGGER.debug("Stopped mobile video recording and uploaded data locally for " + sessionId);
                 } catch (Throwable e) {
                     LOGGER.error("Unable to stop screen recording!", e);
-                }
-                
-                if (data == null || data.isEmpty()) {
-                    // do nothing
-                    return;
-                }
-                
-                // create file in artifacts using driver session id
-                //IMPORTANT! DON'T MODIFY FILENAME WITHOUT UPDATING DRIVER FACTORIES AND LISTENERS!
-                String fileName = String.format(SpecialKeywords.DEFAULT_VIDEO_FILENAME, command.getSessionId());
-                String filePath = ReportContext.getArtifactsFolder().getAbsolutePath() + File.separator + fileName;
-                File file = null;
-                
-                try {
-                    LOGGER.debug("Saving video artifact: " + fileName);
-                    file = new File(filePath);
-                    FileUtils.writeByteArrayToFile(file, Base64.getDecoder().decode(data));
-                    LOGGER.debug("Saved video artifact: " + fileName);
-                } catch (IOException e) {
-                    LOGGER.warn("Error has been occurred during video artifact generation: " + fileName, e);
                 }
 			}
 		}

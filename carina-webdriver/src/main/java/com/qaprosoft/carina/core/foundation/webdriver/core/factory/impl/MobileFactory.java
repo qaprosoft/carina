@@ -127,11 +127,8 @@ public class MobileFactory extends AbstractFactory {
                             LOGGER.error("Screen record bitrate value should be integer.", e);
                         }
                     }
-                    //TODO: setup ftp uploader by default
+                    
                     AndroidStopScreenRecordingOptions o2 = new AndroidStopScreenRecordingOptions();
-                    // .withUploadOptions(new ScreenRecordingUploadOptions()
-                    // .withRemotePath(String.format(R.CONFIG.get("screen_record_ftp"), videoName))
-                    // .withAuthCredentials(R.CONFIG.get("screen_record_user"), R.CONFIG.get("screen_record_pass")));
                     
                     ce.getListeners()
                             .add(new MobileRecordingListener<AndroidStartScreenRecordingOptions, AndroidStopScreenRecordingOptions>(ce, o1, o2));
