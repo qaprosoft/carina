@@ -125,7 +125,8 @@ public class MobileFactory extends AbstractFactory {
 
                     }
 
-                    driver = new AndroidDriver<AndroidElement>(new URL(seleniumHost), capabilities);
+                    // driver = new AndroidDriver<AndroidElement>(new URL(seleniumHost), capabilities);
+                    driver = new RemoteWebDriver(new URL(seleniumHost), capabilities);
 
                 } else if (mobilePlatformName.equalsIgnoreCase(SpecialKeywords.IOS)
                         || mobilePlatformName.equalsIgnoreCase(SpecialKeywords.TVOS)) {
