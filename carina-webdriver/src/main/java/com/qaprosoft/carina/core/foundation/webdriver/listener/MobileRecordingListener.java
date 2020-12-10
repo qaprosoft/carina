@@ -61,8 +61,10 @@ public class MobileRecordingListener<O1 extends BaseStartScreenRecordingOptions,
                     String sessionId = command.getSessionId().toString();
                     LOGGER.debug("Stopping mobile video recording and upload data locally for " + sessionId);
                     stopRecordingOpt.withUploadOptions(new ScreenRecordingUploadOptions()
-                            .withRemotePath(String.format(R.CONFIG.get("screen_record_ftp"), "artifacts/test-sessions/" + sessionId + "/video.mp4"))
+                            .withRemotePath(String.format(R.CONFIG.get("screen_record_ftp"), sessionId))
                             .withAuthCredentials(R.CONFIG.get("screen_record_user"), R.CONFIG.get("screen_record_pass")));
+                    
+                    // .withRemotePath(String.format(R.CONFIG.get("screen_record_ftp"), "artifacts/test-sessions/" + sessionId + "/video.mp4"))
                     
                     commandExecutor
                             .execute(new Command(command.getSessionId(), MobileCommand.STOP_RECORDING_SCREEN,
