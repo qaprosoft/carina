@@ -63,7 +63,7 @@
         <selenium.version>3.141.59</selenium.version>
         <appium.version>7.4.1</appium.version>
         <!-- Zebrunner integrations -->
-        <zebrunner-testng-pluggable.version>1.3.0.167-SNAPSHOT</zebrunner-testng-pluggable.version>
+        <zebrunner-testng-pluggable.version>1.3.0.170-SNAPSHOT</zebrunner-testng-pluggable.version>
         <!-- Others -->
         <aws-java-sdk.version>1.11.923</aws-java-sdk.version>
         <rest-assured.version>4.3.0</rest-assured.version>
