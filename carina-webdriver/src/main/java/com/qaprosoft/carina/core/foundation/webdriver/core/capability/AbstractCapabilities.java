@@ -64,7 +64,7 @@ public abstract class AbstractCapabilities {
         if ("*".equalsIgnoreCase(browserVersion)) {
             browserVersion = "";
         }
-        capabilities.setVersion(browserVersion);
+//        capabilities.setVersion(browserVersion);
         capabilities.setCapability("name", testName);
 
         Proxy proxy = setupProxy();
