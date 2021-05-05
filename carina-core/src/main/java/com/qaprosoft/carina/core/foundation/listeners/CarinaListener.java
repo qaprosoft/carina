@@ -587,7 +587,6 @@ public class CarinaListener extends AbstractTestListener implements ISuiteListen
             String platformName = matcher.group(2);
             String buildType = matcher.group(3);
             String version = matcher.group(4);
-            LOGGER.info("appName: " + appName + "; version: " + version);
 
             //TODO: test if generated appcenter download url is valid
             String presignedAppUrl = AppCenterManager.getInstance().getDownloadUrl(appName, platformName, buildType,
