@@ -97,7 +97,6 @@
         <module>carina-aws-s3</module>
         <module>carina-appcenter</module>
         <module>carina-core</module>
-        <module>carina-azure</module>
     </modules>
     <repositories>
         <repository>
@@ -350,11 +349,6 @@
             <dependency>
                 <groupId>com.qaprosoft</groupId>
                 <artifactId>carina-aws-s3</artifactId>
-                <version>1.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.qaprosoft</groupId>
-                <artifactId>carina-azure</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
             <dependency>

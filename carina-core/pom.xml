@@ -110,10 +110,6 @@
 			<groupId>io.appium</groupId>
 			<artifactId>java-client</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>com.qaprosoft</groupId>
-            <artifactId>carina-azure</artifactId>
-        </dependency>
 
     </dependencies>
 
