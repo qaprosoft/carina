@@ -54,7 +54,7 @@ import com.qaprosoft.carina.core.foundation.utils.Configuration.Parameter;
 public class AppCenterManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     
-    protected RestTemplate restTemplate = RestTemplateBuilder.newInstance().withDisabledSslChecking().withSpecificJsonMessageConverter().build();
+    protected RestTemplate restTemplate;
 
     private String ownerName;
     private String versionLong;
@@ -72,8 +72,13 @@ public class AppCenterManager {
         if (instance == null) {
             instance = new AppCenterManager();
         }
+        LOGGER.info("000");
         return instance;
     }
+    
+    private void disableRestTemplateSsl() {
+        this.restTemplate = RestTemplateBuilder.newInstance().withDisabledSslChecking().withSpecificJsonMessageConverter().build();
+    }    
 
     /**
     *
@@ -85,6 +90,8 @@ public class AppCenterManager {
     * @return download url for build artifact.
     */
    public String getDownloadUrl(String appName, String platformName, String buildType, String version) {
+       LOGGER.info("111");
+       disableRestTemplateSsl();
        LOGGER.info("appName: " + appName + "; version: " + version);
        return scanAppForBuild(getAppId(appName, platformName), buildType, version);
    }    
