@@ -85,6 +85,7 @@ public class AppCenterManager {
     * @return download url for build artifact.
     */
    public String getDownloadUrl(String appName, String platformName, String buildType, String version) {
+       LOGGER.info("appName: " + appName + "; version: " + version);
        return scanAppForBuild(getAppId(appName, platformName), buildType, version);
    }    
 
@@ -173,13 +174,16 @@ public class AppCenterManager {
      * @return
      */
     private Map<String, String> getAppId(String appName, String platformName) {
+        LOGGER.info("appName: " + appName + "; platformName: " + platformName);
         Map<String, String> appMap = new HashMap<>();
 
         RequestEntity<String> retrieveApps = buildRequestEntity(
                 HOST_URL,
                 API_APPS,
                 HttpMethod.GET);
-        JsonNode appResults = restTemplate.exchange(retrieveApps, JsonNode.class).getBody();
+        LOGGER.info("before rest call");
+        JsonNode appResults = this.restTemplate.exchange(retrieveApps, JsonNode.class).getBody();
+        LOGGER.info("after rest call, appResults: " + appResults.toString());
         LOGGER.info("AppCenter Searching For App: " + appName);
         LOGGER.debug("AppCenter JSON Response: " + appResults);
 
