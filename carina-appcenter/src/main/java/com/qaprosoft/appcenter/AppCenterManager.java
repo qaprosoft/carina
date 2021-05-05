@@ -72,7 +72,6 @@ public class AppCenterManager {
         if (instance == null) {
             instance = new AppCenterManager();
         }
-        LOGGER.info("000");
         return instance;
     }
     
@@ -90,7 +89,6 @@ public class AppCenterManager {
     * @return download url for build artifact.
     */
    public String getDownloadUrl(String appName, String platformName, String buildType, String version) {
-       LOGGER.info("111");
        disableRestTemplateSsl();
        LOGGER.info("appName: " + appName + "; version: " + version);
        return scanAppForBuild(getAppId(appName, platformName), buildType, version);
