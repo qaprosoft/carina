@@ -28,6 +28,12 @@
         <dependency>
             <groupId>com.qaprosoft</groupId>
             <artifactId>carina-utils</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
