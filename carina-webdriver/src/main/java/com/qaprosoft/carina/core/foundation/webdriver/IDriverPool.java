@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import com.zebrunner.agent.core.webdriver.RemoteWebDriverFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.MDC;
 import org.openqa.selenium.WebDriver;
@@ -79,7 +80,7 @@ public interface IDriverPool {
      * @return default WebDriver
      */
     default public WebDriver getDriver() {
-        return getDriver(DEFAULT);
+        return RemoteWebDriverFactory.getDriver();
     }
 
     /**
