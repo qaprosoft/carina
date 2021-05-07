@@ -63,6 +63,7 @@ import org.testng.Assert;
 
 import com.qaprosoft.carina.core.foundation.commons.SpecialKeywords;
 import com.qaprosoft.carina.core.foundation.crypto.CryptoTool;
+import com.qaprosoft.carina.core.foundation.exception.DriverPoolException;
 import com.qaprosoft.carina.core.foundation.performance.ACTION_NAME;
 import com.qaprosoft.carina.core.foundation.utils.Configuration;
 import com.qaprosoft.carina.core.foundation.utils.Configuration.Parameter;
@@ -228,7 +229,13 @@ public class ExtendedWebElement {
 				}
 				//this.driver = (WebDriver) tempSearchContext;
 				// that's the only place to use DriverPool to get driver.
-				this.driver = IDriverPool.getDriver(sessionId);
+				try {
+				    //try to search securely in driver pool by sessionId
+				    this.driver = IDriverPool.getDriver(sessionId);
+				} catch (DriverPoolException ex) {
+				    // seems like driver started outside of IDriverPool so try to register it as well
+				    this.driver = (WebDriver) tempSearchContext;
+				}
 			} else {
 				LOGGER.error("Undefined error for searchContext: " + tempSearchContext.toString());
 			}
