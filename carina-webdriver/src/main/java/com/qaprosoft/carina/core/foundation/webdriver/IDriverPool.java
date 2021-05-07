@@ -80,7 +80,7 @@ public interface IDriverPool {
      * @return default WebDriver
      */
     default public WebDriver getDriver() {
-        return RemoteWebDriverFactory.getDriver();
+        return getDriver(DEFAULT);
     }
 
     /**
