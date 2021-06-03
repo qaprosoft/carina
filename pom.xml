@@ -57,7 +57,7 @@
         <commons-io.version>2.7</commons-io.version>
         <commons-codec.version>1.9</commons-codec.version>
         <commons-collections.version>3.2.2</commons-collections.version>
-        <httpclient.version>4.5.9</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <jna.version>3.0.9</jna.version>
         <!-- Selenium -->
         <selenium.version>3.141.59</selenium.version>
