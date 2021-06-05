@@ -171,6 +171,12 @@ public class DriverListener implements WebDriverEventListener {
             // do nothing
             return;
         }
+        
+        // #1361 don't do driver.quit call if driver wasn't started or was terminated
+        if (thr.getMessage().contains("was terminated due to")) {
+            // initiate DriverPool cleanup removing existing driver asap without quit
+            //TODO: implement cleanup or marking driver as terminated in the pool
+        }
 
         // handle use-case when application crashed on iOS but tests continue to execute something because doesn't raise valid exception
         // Example:
