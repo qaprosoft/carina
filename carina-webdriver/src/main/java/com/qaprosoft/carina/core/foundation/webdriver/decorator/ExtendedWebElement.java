@@ -936,12 +936,11 @@ public class ExtendedWebElement implements IWebElement {
 	public boolean isVisible(long timeout) {
 		ExpectedCondition<?> waitCondition;
 
-		if (element != null) {
-			waitCondition = ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(getBy()),
-			        ExpectedConditions.visibilityOf(element));
-		} else {
-			waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
-		}
+        if (element != null) {
+            waitCondition = ExpectedConditions.visibilityOf(element);
+        } else {
+            waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+        }
 		
 		return waitUntil(waitCondition, timeout);
 	}
@@ -1126,8 +1125,7 @@ public class ExtendedWebElement implements IWebElement {
     		return true;
     	}
 
-        return waitUntil(ExpectedConditions.or(ExpectedConditions.invisibilityOfElementLocated(getBy()),
-                ExpectedConditions.stalenessOf(element),
+        return waitUntil(ExpectedConditions.or( ExpectedConditions.stalenessOf(element),
                 ExpectedConditions.invisibilityOf(element)), timeout);
     }
 
@@ -1790,7 +1788,7 @@ public class ExtendedWebElement implements IWebElement {
         switch (loadingStrategy) {
         case BY_PRESENCE: {
             if (element != null) {
-                waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+                waitCondition = ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
             } else {
                 waitCondition = ExpectedConditions.presenceOfElementLocated(myBy);
             }
@@ -1798,7 +1796,7 @@ public class ExtendedWebElement implements IWebElement {
         }
         case BY_VISIBILITY: {
             if (element != null) {
-                waitCondition = ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+                waitCondition = ExpectedConditions.and(ExpectedConditions.visibilityOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
             } else {
                 waitCondition = ExpectedConditions.visibilityOfElementLocated(myBy);
             }
@@ -1806,7 +1804,7 @@ public class ExtendedWebElement implements IWebElement {
         }
         case BY_PRESENCE_OR_VISIBILITY:
             if (element != null) {
-                waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy),
+                waitCondition = ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(myBy),
                         ExpectedConditions.visibilityOfElementLocated(myBy),
                         ExpectedConditions.visibilityOf(element));
             } else {
