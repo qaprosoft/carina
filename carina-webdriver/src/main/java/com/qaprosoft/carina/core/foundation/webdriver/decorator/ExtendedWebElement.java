@@ -859,8 +859,12 @@ public class ExtendedWebElement implements IWebElement {
         // visibilityOf: Does not check for presence of the element as the error explains it.
         // visibilityOfElementLocated: Checks to see if the element is present and also visible. To check visibility, it makes sure that the element
         // has a height and width greater than 0.
-    	
-        waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+
+        if (element != null){
+            waitCondition = ExpectedConditions.visibilityOf(element);
+        } else {
+            waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+        }
 		boolean tmpResult = waitUntil(waitCondition, 1);
 
 		if (tmpResult) {
