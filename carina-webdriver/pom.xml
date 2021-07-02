@@ -101,6 +101,11 @@
 			<artifactId>selenium-chrome-driver</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
+
 		<!-- Appium -->
 		<dependency>
 			<groupId>io.appium</groupId>
