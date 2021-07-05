@@ -87,13 +87,13 @@ public class ExtendedWebElement implements IWebElement {
     private static final long EXPLICIT_TIMEOUT = Configuration.getLong(Parameter.EXPLICIT_TIMEOUT);
 
     private static final long RETRY_TIME = Configuration.getLong(Parameter.RETRY_INTERVAL);
-    
+
     // we should keep both properties: driver and searchContext obligatory
     // driver is used for actions, javascripts execution etc
     // searchContext is used for searching element by default
     private WebDriver driver;
     private SearchContext searchContext;
-    
+
     private CryptoTool cryptoTool = new CryptoTool(Configuration.get(Parameter.CRYPTO_KEY_PATH));
 
     private static Pattern CRYPTO_PATTERN = Pattern.compile(SpecialKeywords.CRYPT);
@@ -102,7 +102,7 @@ public class ExtendedWebElement implements IWebElement {
     private Throwable originalException;
     private String name;
     private By by;
-    
+
     private boolean caseInsensitive;
 
     private ElementLoadingStrategy loadingStrategy = ElementLoadingStrategy.valueOf(Configuration.get(Parameter.ELEMENT_LOADING_STRATEGY));
@@ -119,17 +119,17 @@ public class ExtendedWebElement implements IWebElement {
     	this.name = name;
     	this.element = null;
     }
-    
+
     public ExtendedWebElement(By by, String name, WebDriver driver) {
     	this.by = by;
     	this.name = name;
     	this.driver = driver;
     }
-    
+
     public ExtendedWebElement(WebElement element, String name) {
     	this.name = name;
         this.element = element;
-        
+
         //read searchContext from not null elements only
         if (element == null) {
         	// it seems like we have to specify WebElement or By annotation! Add verification that By is valid in this case!
@@ -179,10 +179,10 @@ public class ExtendedWebElement implements IWebElement {
 
 				byContextField = locator.getClass().getDeclaredField("by");
 				byContextField.setAccessible(true);
-				//TODO: identify if it is a child element and 
+				//TODO: identify if it is a child element and
 				//	1. get rootBy
-				//  2. append current "by" to the rootBy 
-				// -> it should allow to search via regular driver and fluent waits - getBy() 
+				//  2. append current "by" to the rootBy
+				// -> it should allow to search via regular driver and fluent waits - getBy()
 				this.by = (By) byContextField.get(locator);
 
 				while (tempSearchContext instanceof Proxy) {
@@ -227,7 +227,7 @@ public class ExtendedWebElement implements IWebElement {
 				if (this.searchContext == null) {
 					// do not override if it was already initialized as it has
 					// real searchContext which shouldn't be replaced by actual driver
-					this.searchContext = tempSearchContext; 
+					this.searchContext = tempSearchContext;
 				}
 				//this.driver = (WebDriver) tempSearchContext;
 				// that's the only place to use DriverPool to get driver.
@@ -251,7 +251,7 @@ public class ExtendedWebElement implements IWebElement {
 			thr.printStackTrace();
 			LOGGER.error("Unable to get Driver, searchContext and By via reflection!", thr);
 		}
-		
+
     	if (this.searchContext == null) {
 			try {
 				throw new RuntimeException("review stacktrace to analyze why searchContext is not populated correctly via reflection!");
@@ -265,11 +265,11 @@ public class ExtendedWebElement implements IWebElement {
     	element = refindElement();
     	return element;
     }
-    
+
     private WebElement getCachedElement() {
         if (element == null) {
             LOGGER.debug("TODO: investigate why cached element might be null!");
-            
+
             //TODO: why 1 sec?
             element = findElement(1);
         }
@@ -284,7 +284,7 @@ public class ExtendedWebElement implements IWebElement {
     public boolean isPresent() {
     	return isPresent(EXPLICIT_TIMEOUT);
     }
-    
+
     /**
      * Check that element present or visible within specified timeout.
      *
@@ -294,7 +294,7 @@ public class ExtendedWebElement implements IWebElement {
     public boolean isPresent(long timeout) {
     	return isPresent(getBy(), timeout);
     }
-    
+
 	/**
 	 * Check that element with By present within specified timeout.
 	 *
@@ -307,8 +307,8 @@ public class ExtendedWebElement implements IWebElement {
 	public boolean isPresent(By by, long timeout) {
 		return waitUntil(getDefaultCondition(by), timeout);
 	}
-	
-	
+
+
     /**
      * Wait until any condition happens.
      *
@@ -323,16 +323,16 @@ public class ExtendedWebElement implements IWebElement {
         }
         boolean result;
 		originalException = null;
-		
+
 		final WebDriver drv = getDriver();
-		
+
 		Wait<WebDriver> wait = new WebDriverWait(drv, timeout, RETRY_TIME);
 
 		// [VD] Notes:
 		// StaleElementReferenceException is handled by selenium ExpectedConditions in many methods
 		// do not ignore TimeoutException or NoSuchSessionException otherwise you can wait for minutes instead of timeout!
-		
-		LOGGER.debug("waitUntil: starting... timeout: " + timeout);		
+
+		LOGGER.debug("waitUntil: starting... timeout: " + timeout);
 		try {
 			wait.until(condition);
 			result = true;
@@ -342,11 +342,11 @@ public class ExtendedWebElement implements IWebElement {
 			LOGGER.debug("waitUntil: NoSuchElementException: " + e.getMessage());
 			result = false;
 			originalException = e;
-        } catch (NoSuchSessionException e) { 
+        } catch (NoSuchSessionException e) {
             LOGGER.debug("waitUntil: NoSuchSessionException: " + e.getMessage());
             result = false;
-            originalException = e.getCause();			
-		} catch (TimeoutException e) { 
+            originalException = e.getCause();
+		} catch (TimeoutException e) {
 			LOGGER.debug("waitUntil: TimeoutException: " + e.getMessage());
 			result = false;
 			originalException = e.getCause();
@@ -368,7 +368,7 @@ public class ExtendedWebElement implements IWebElement {
         if (element != null) {
             return element;
         }
-        
+
         if (isPresent(timeout)) {
         	//TODO: investigate maybe searchContext better to use here!
         	element = getDriver().findElement(by);
@@ -378,7 +378,7 @@ public class ExtendedWebElement implements IWebElement {
 
         return element;
     }
-    
+
     private WebElement refindElement() {
         // do not return without element initialization!
         // TODO: if is added as part of a hotfix. Ideal solution should init searchContext everytime so we can remove getDriver usage from this class
@@ -409,7 +409,7 @@ public class ExtendedWebElement implements IWebElement {
         }
         return element;
     }
-    
+
     public void setElement(WebElement element) {
         this.element = element;
     }
@@ -425,7 +425,7 @@ public class ExtendedWebElement implements IWebElement {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * Get element By.
      *
@@ -505,7 +505,7 @@ public class ExtendedWebElement implements IWebElement {
     public void click(long timeout) {
         click(timeout, getDefaultCondition(getBy()));
     }
-    
+
 	/**
 	 * Click on element.
 	 *
@@ -520,7 +520,7 @@ public class ExtendedWebElement implements IWebElement {
     		doAction(ACTION_NAME.CLICK, timeout, waitCondition);
     	}
     }
-    
+
 	private boolean isMobile() {
 		// TODO: investigating potential class cast exception
 		WebDriver driver = getDriver();
@@ -533,7 +533,7 @@ public class ExtendedWebElement implements IWebElement {
     public void doubleClick() {
     	doubleClick(EXPLICIT_TIMEOUT);
     }
-    
+
     /**
      * Double Click on element.
      *
@@ -553,14 +553,14 @@ public class ExtendedWebElement implements IWebElement {
     	doAction(ACTION_NAME.DOUBLE_CLICK, timeout, waitCondition);
     }
 
-    
+
     /**
      * Mouse RightClick on element.
      */
     public void rightClick() {
     	rightClick(EXPLICIT_TIMEOUT);
     }
-    
+
     /**
      * Mouse RightClick on element.
      *
@@ -569,7 +569,7 @@ public class ExtendedWebElement implements IWebElement {
     public void rightClick(long timeout) {
     	rightClick(timeout, getDefaultCondition(getBy()));
     }
-    
+
     /**
      * Mouse RightClick on element.
      *
@@ -580,7 +580,7 @@ public class ExtendedWebElement implements IWebElement {
     public void rightClick(long timeout, ExpectedCondition<?> waitCondition) {
     	doAction(ACTION_NAME.RIGHT_CLICK, timeout, waitCondition);
     }
-    
+
 
     /**
      * MouseOver (Hover) an element.
@@ -597,7 +597,7 @@ public class ExtendedWebElement implements IWebElement {
     public void hover(Integer xOffset, Integer yOffset) {
     	doAction(ACTION_NAME.HOVER, EXPLICIT_TIMEOUT, getDefaultCondition(getBy()), xOffset, yOffset);
     }
-    
+
     /**
      * Click onto element if it present.
      *
@@ -622,10 +622,10 @@ public class ExtendedWebElement implements IWebElement {
         return present;
     }
 
-    
+
     /**
      * Send Keys to element.
-     * 
+     *
 	 * @param keys Keys
      */
     public void sendKeys(Keys keys) {
@@ -641,7 +641,7 @@ public class ExtendedWebElement implements IWebElement {
     public void sendKeys(Keys keys, long timeout) {
     	sendKeys(keys, timeout, getDefaultCondition(getBy()));
     }
-    
+
 	/**
 	 * Send Keys to element.
 	 *
@@ -653,11 +653,11 @@ public class ExtendedWebElement implements IWebElement {
     public void sendKeys(Keys keys, long timeout, ExpectedCondition<?> waitCondition) {
     	doAction(ACTION_NAME.SEND_KEYS, timeout, waitCondition, keys);
     }
-    
-    
+
+
     /**
      * Type text to element.
-     * 
+     *
 	 * @param text String
      */
     public void type(String text) {
@@ -673,7 +673,7 @@ public class ExtendedWebElement implements IWebElement {
     public void type(String text, long timeout) {
     	type(text, timeout, getDefaultCondition(getBy()));
     }
-    
+
 	/**
 	 * Type text to element.
 	 *
@@ -685,11 +685,11 @@ public class ExtendedWebElement implements IWebElement {
     public void type(String text, long timeout, ExpectedCondition<?> waitCondition) {
     	doAction(ACTION_NAME.TYPE, timeout, waitCondition, text);
     }
-    
+
     /**
     /**
      * Scroll to element (applied only for desktop).
-     * Useful for desktop with React 
+     * Useful for desktop with React
      */
     public void scrollTo() {
         if (Configuration.getDriverType().equals(SpecialKeywords.MOBILE)) {
@@ -712,7 +712,7 @@ public class ExtendedWebElement implements IWebElement {
         	//do nothing
         }
     }
-     
+
     /* Inputs file path to specified element.
      *
      * @param filePath path
@@ -854,16 +854,16 @@ public class ExtendedWebElement implements IWebElement {
 		}
 
     	ExpectedCondition<?> waitCondition;
-    	
+
         // [VD] replace presenceOfElementLocated and visibilityOf conditions by single "visibilityOfElementLocated"
         // visibilityOf: Does not check for presence of the element as the error explains it.
         // visibilityOfElementLocated: Checks to see if the element is present and also visible. To check visibility, it makes sure that the element
         // has a height and width greater than 0.
 
-        if (element != null){
-            waitCondition = ExpectedConditions.visibilityOf(element);
-        } else {
+        if (Configuration.getPlatform().equalsIgnoreCase("iOS")){
             waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+        } else {
+            waitCondition = ExpectedConditions.visibilityOf(element);
         }
 		boolean tmpResult = waitUntil(waitCondition, 1);
 
@@ -912,13 +912,17 @@ public class ExtendedWebElement implements IWebElement {
      */
     public boolean isClickable(long timeout) {
     	ExpectedCondition<?> waitCondition;
-    	
-		if (element != null) {
-			waitCondition = ExpectedConditions.elementToBeClickable(element);
-		} else {
-			waitCondition = ExpectedConditions.elementToBeClickable(getBy());
-		}
-		
+
+        if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+            if (element != null) {
+                waitCondition = ExpectedConditions.or(ExpectedConditions.elementToBeClickable(getBy()),
+                        ExpectedConditions.elementToBeClickable(element));
+            } else {
+                waitCondition = ExpectedConditions.elementToBeClickable(getBy());
+            }
+        } else {
+            waitCondition = ExpectedConditions.elementToBeClickable(element);
+        }
     	return waitUntil(waitCondition, timeout);
     }
 
@@ -940,16 +944,21 @@ public class ExtendedWebElement implements IWebElement {
 	public boolean isVisible(long timeout) {
 		ExpectedCondition<?> waitCondition;
 
-        if (element != null) {
-            waitCondition = ExpectedConditions.visibilityOf(element);
+        if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+            if (element != null) {
+                waitCondition = ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(getBy()),
+                        ExpectedConditions.visibilityOf(element));
+            } else {
+                waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+            }
         } else {
-            waitCondition = ExpectedConditions.visibilityOfElementLocated(getBy());
+            waitCondition = ExpectedConditions.visibilityOf(element);
         }
-		
+
 		return waitUntil(waitCondition, timeout);
 	}
 
-	
+
     /**
      * Check that element with text present.
      *
@@ -973,7 +982,7 @@ public class ExtendedWebElement implements IWebElement {
 		if (element != null) {
 			ExpectedCondition<Boolean>  tmpCondition = ExpectedConditions.and(ExpectedConditions.visibilityOf(element));
 			boolean tmpResult = waitUntil(tmpCondition, 1);
-			
+
 			if (!tmpResult && originalException != null && StaleElementReferenceException.class.equals(originalException.getClass())) {
 				LOGGER.debug("StaleElementReferenceException detected in isElementWithTextPresent!");
 				try {
@@ -984,7 +993,7 @@ public class ExtendedWebElement implements IWebElement {
 					textCondition = ExpectedConditions.textToBePresentInElementLocated(getBy(), decryptedText);
 				}
 			}
-			
+
 			textCondition = ExpectedConditions.textToBePresentInElement(element, decryptedText);
 		} else {
 			textCondition = ExpectedConditions.textToBePresentInElementLocated(getBy(), decryptedText);
@@ -995,7 +1004,7 @@ public class ExtendedWebElement implements IWebElement {
 //				ExpectedConditions.textToBe(getBy(), decryptedText)), timeout);
 
     }
-    
+
     public void assertElementWithTextPresent(final String text) {
         assertElementWithTextPresent(text, EXPLICIT_TIMEOUT);
     }
@@ -1005,7 +1014,7 @@ public class ExtendedWebElement implements IWebElement {
             Assert.fail(Messager.ELEMENT_WITH_TEXT_NOT_PRESENT.getMessage(getNameWithLocator(), text));
         }
     }
-    
+
     public void assertElementPresent() {
         assertElementPresent(EXPLICIT_TIMEOUT);
     }
@@ -1081,7 +1090,7 @@ public class ExtendedWebElement implements IWebElement {
     public List<ExtendedWebElement> findExtendedWebElements(final By by, long timeout) {
         List<ExtendedWebElement> extendedWebElements = new ArrayList<ExtendedWebElement>();
         List<WebElement> webElements = new ArrayList<WebElement>();
-        
+
         if (isPresent(by, timeout)) {
 			try {
 				webElements = getCachedElement().findElements(by);
@@ -1118,7 +1127,7 @@ public class ExtendedWebElement implements IWebElement {
                 element = searchContext.findElement(by);
             } else {
                 LOGGER.debug("waitUntilElementDisappear: searchContext is null for " + getNameWithLocator());
-                element = getDriver().findElement(by);  
+                element = getDriver().findElement(by);
             }
     	} catch (NoSuchElementException e) {
     		//element not present so means disappear
@@ -1129,8 +1138,14 @@ public class ExtendedWebElement implements IWebElement {
     		return true;
     	}
 
-        return waitUntil(ExpectedConditions.or( ExpectedConditions.stalenessOf(element),
-                ExpectedConditions.invisibilityOf(element)), timeout);
+        if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+            return waitUntil(ExpectedConditions.or(ExpectedConditions.invisibilityOfElementLocated(getBy()),
+                    ExpectedConditions.stalenessOf(element),
+                    ExpectedConditions.invisibilityOf(element)), timeout);
+        } else {
+            return waitUntil(ExpectedConditions.or(ExpectedConditions.stalenessOf(element),
+                    ExpectedConditions.invisibilityOf(element)), timeout);
+        }
     }
 
     public ExtendedWebElement format(Object... objects) {
@@ -1155,7 +1170,7 @@ public class ExtendedWebElement implements IWebElement {
                 by = ExtendedElementLocator.toCaseInsensitive(locator);
             }
         }
-        
+
         if (locator.startsWith("linkText: ")) {
             by = By.linkText(String.format(StringUtils.remove(locator, "linkText: "), objects));
         }
@@ -1178,7 +1193,7 @@ public class ExtendedWebElement implements IWebElement {
         if (locator.startsWith("By.IosClassChain: **")) {
             by = MobileBy.iOSClassChain(String.format(StringUtils.remove(locator, "By.IosClassChain: "), objects));
         }
-        
+
         if (locator.startsWith("By.IosNsPredicate: **")) {
             by = MobileBy.iOSNsPredicateString(String.format(StringUtils.remove(locator, "By.IosNsPredicate: "), objects));
         }
@@ -1186,7 +1201,7 @@ public class ExtendedWebElement implements IWebElement {
         if (locator.startsWith("By.AccessibilityId: ")) {
             by = MobileBy.AccessibilityId(String.format(StringUtils.remove(locator, "By.AccessibilityId: "), objects));
         }
-        
+
         if (locator.startsWith("By.Image: ")) {
             String formattedLocator = String.format(StringUtils.remove(locator, "By.Image: "), objects);
             Path path = Paths.get(formattedLocator);
@@ -1212,7 +1227,7 @@ public class ExtendedWebElement implements IWebElement {
 
     /**
      * Pause for specified timeout.
-     * 
+     *
      * @param timeout in seconds.
      */
 
@@ -1224,16 +1239,16 @@ public class ExtendedWebElement implements IWebElement {
         CommonUtils.pause(timeout);
     }
 
-    
+
 	public interface ActionSteps {
 		void doClick();
-		
+
 		void doTap();
 
 		void doDoubleClick();
 
 		void doRightClick();
-		
+
 		void doHover(Integer xOffset, Integer yOffset);
 
 		void doType(String text);
@@ -1245,9 +1260,9 @@ public class ExtendedWebElement implements IWebElement {
 		void doCheck();
 
 		void doUncheck();
-		
+
 		boolean doIsChecked();
-		
+
 		String doGetText();
 
 		Point doGetLocation();
@@ -1265,9 +1280,9 @@ public class ExtendedWebElement implements IWebElement {
 		boolean doSelectByPartialText(final String partialSelectText);
 
 		boolean doSelectByIndex(final int index);
-		
+
 		String doGetSelectedValue();
-		
+
 		List<String> doGetSelectedValues();
 	}
 
@@ -1367,12 +1382,12 @@ public class ExtendedWebElement implements IWebElement {
 
 	private Object doAction(ACTION_NAME actionName, long timeout, ExpectedCondition<?> waitCondition,
 			Object...inputArgs) {
-		
+
 		// do explicit single call to selenium/appium to detect new element before fluentWaits
-		// it should resolve stale element exceptions much more effective 
+		// it should resolve stale element exceptions much more effective
 		// (more stable and faster for already present but cached incorrectly elements)
 		//detectElement();
-		
+
 		if (waitCondition != null) {
 			//do verification only if waitCondition is fine
 			//TODO: [VD] find another way to test waitCondition as TimeoutException in DEBUG logs are displayed!
@@ -1381,13 +1396,13 @@ public class ExtendedWebElement implements IWebElement {
 //				LOGGER.debug("StaleElementReferenceException detected in doAction!");
 //				refindElement();
 //			}
-			
+
 //		    if (!tmpResult && !waitUntil(waitCondition, timeout)) {
 			if (!waitUntil(waitCondition, timeout)) {
 				LOGGER.error(Messager.ELEMENT_CONDITION_NOT_VERIFIED.getMessage(actionName.getKey(), getNameWithLocator()));
 			}
 		}
-		
+
         if (isLocalized) {
             isLocalized = false; // single verification is enough for this particular element
             L10N.verify(this);
@@ -1420,7 +1435,7 @@ public class ExtendedWebElement implements IWebElement {
 			output = overrideAction(actionName, inputArgs);
 		} catch (Throwable e) {
 		    LOGGER.error(e.getMessage(), e);
-			// print stack trace temporary to be able to handle any problem without extra debugging 
+			// print stack trace temporary to be able to handle any problem without extra debugging
 			e.printStackTrace();
 			throw e;
 		} finally {
@@ -1458,7 +1473,7 @@ public class ExtendedWebElement implements IWebElement {
 					}
 				}
 			}
-			
+
 			@Override
 			// click for mobile devices
 			public void doTap() {
@@ -1472,17 +1487,17 @@ public class ExtendedWebElement implements IWebElement {
 			public void doDoubleClick() {
 				DriverListener.setMessages(Messager.ELEMENT_DOUBLE_CLICKED.getMessage(getName()),
 						Messager.ELEMENT_NOT_DOUBLE_CLICKED.getMessage(getNameWithLocator()));
-				
+
 				WebDriver drv = getDriver();
 				Actions action = new Actions(drv);
 				action.moveToElement(element).doubleClick(element).build().perform();
 			}
-			
+
 			@Override
 			public void doHover(Integer xOffset, Integer yOffset) {
 				DriverListener.setMessages(Messager.ELEMENT_HOVERED.getMessage(getName()),
 						Messager.ELEMENT_NOT_HOVERED.getMessage(getNameWithLocator()));
-				
+
 				WebDriver drv = getDriver();
 				Actions action = new Actions(drv);
 				if (xOffset != null && yOffset!= null) {
@@ -1491,7 +1506,7 @@ public class ExtendedWebElement implements IWebElement {
 					action.moveToElement(element).build().perform();
 				}
 			}
-			
+
 			@Override
 			public void doSendKeys(Keys keys) {
 				DriverListener.setMessages(Messager.KEYS_SEND_TO_ELEMENT.getMessage(keys.toString(), getName()),
@@ -1568,7 +1583,7 @@ public class ExtendedWebElement implements IWebElement {
 			public void doRightClick() {
 				DriverListener.setMessages(Messager.ELEMENT_RIGHT_CLICKED.getMessage(getName()),
 						Messager.ELEMENT_NOT_RIGHT_CLICKED.getMessage(getNameWithLocator()));
-				
+
 				WebDriver drv = getDriver();
 				Actions action = new Actions(drv);
 				action.moveToElement(element).contextClick(element).build().perform();
@@ -1577,12 +1592,12 @@ public class ExtendedWebElement implements IWebElement {
 			@Override
 			public void doCheck() {
 				DriverListener.setMessages(Messager.CHECKBOX_CHECKED.getMessage(getName()), null);
-				
+
                 boolean isSelected = element.isSelected();
                 if (element.getAttribute("checked") != null) {
                     isSelected |= element.getAttribute("checked").equalsIgnoreCase("true");
                 }
-                
+
 				if (!isSelected) {
 					click();
 				}
@@ -1591,38 +1606,38 @@ public class ExtendedWebElement implements IWebElement {
 			@Override
 			public void doUncheck() {
 				DriverListener.setMessages(Messager.CHECKBOX_UNCHECKED.getMessage(getName()), null);
-				
+
                 boolean isSelected = element.isSelected();
                 if (element.getAttribute("checked") != null) {
                     isSelected |= element.getAttribute("checked").equalsIgnoreCase("true");
                 }
-                
+
 				if (isSelected) {
 					click();
 				}
 			}
-			
+
 			@Override
 			public boolean doIsChecked() {
-				
+
 		        boolean res = element.isSelected();
 		        if (element.getAttribute("checked") != null) {
 		            res |= element.getAttribute("checked").equalsIgnoreCase("true");
 		        }
-		        
+
 		        return res;
 			}
-			
+
 			@Override
 			public boolean doSelect(String text) {
 				final String decryptedSelectText = cryptoTool.decryptByPattern(text, CRYPTO_PATTERN);
-				
+
 				String textLog = (!decryptedSelectText.equals(text) ? "********" : text);
-				
+
 				DriverListener.setMessages(Messager.SELECT_BY_TEXT_PERFORMED.getMessage(textLog, getName()),
 						Messager.SELECT_BY_TEXT_NOT_PERFORMED.getMessage(textLog, getNameWithLocator()));
 
-				
+
 				final Select s = new Select(getCachedElement());
 				// [VD] do not use selectByValue as modern controls could have only visible value without value
 				s.selectByVisibleText(decryptedSelectText);
@@ -1642,11 +1657,11 @@ public class ExtendedWebElement implements IWebElement {
 
 			@Override
 			public boolean doSelectByMatcher(BaseMatcher<String> matcher) {
-				
+
 				DriverListener.setMessages(Messager.SELECT_BY_MATCHER_TEXT_PERFORMED.getMessage(matcher.toString(), getName()),
 						Messager.SELECT_BY_MATCHER_TEXT_NOT_PERFORMED.getMessage(matcher.toString(), getNameWithLocator()));
 
-				
+
 				final Select s = new Select(getCachedElement());
 				String fullTextValue = null;
 				for (WebElement option : s.getOptions()) {
@@ -1661,11 +1676,11 @@ public class ExtendedWebElement implements IWebElement {
 
 			@Override
 			public boolean doSelectByPartialText(String partialSelectText) {
-				
+
 				DriverListener.setMessages(
 						Messager.SELECT_BY_TEXT_PERFORMED.getMessage(partialSelectText, getName()),
 						Messager.SELECT_BY_TEXT_NOT_PERFORMED.getMessage(partialSelectText, getNameWithLocator()));
-				
+
 				final Select s = new Select(getCachedElement());
 				String fullTextValue = null;
 				for (WebElement option : s.getOptions()) {
@@ -1683,8 +1698,8 @@ public class ExtendedWebElement implements IWebElement {
 				DriverListener.setMessages(
 						Messager.SELECT_BY_INDEX_PERFORMED.getMessage(String.valueOf(index), getName()),
 						Messager.SELECT_BY_INDEX_NOT_PERFORMED.getMessage(String.valueOf(index), getNameWithLocator()));
-				
-				
+
+
 				final Select s = new Select(getCachedElement());
 				s.selectByIndex(index);
 				return true;
@@ -1705,7 +1720,7 @@ public class ExtendedWebElement implements IWebElement {
 		        }
 		        return values;
 			}
-			
+
 		}, inputArgs);
 		return output;
 	}
@@ -1718,14 +1733,14 @@ public class ExtendedWebElement implements IWebElement {
 		}
 		return driver;
     }
-    
+
     private WebDriver castDriver(WebDriver drv) {
         if (drv instanceof EventFiringWebDriver) {
             drv = ((EventFiringWebDriver) drv).getWrappedDriver();
         }
         return drv;
     }
-    
+
 	//TODO: investigate how can we merge the similar functionality in ExtendedWebElement, DriverHelper and LocalizedAnnotations
     public By generateByForList(By by, int index) {
         String locator = by.toString();
@@ -1753,7 +1768,7 @@ public class ExtendedWebElement implements IWebElement {
         if (locator.startsWith("css: ")) {
         	resBy = By.cssSelector(StringUtils.remove(locator, "css: ") + ":nth-child(" + index + ")");
         }
-        
+
         if (locator.startsWith("By.cssSelector: ")) {
         	resBy = By.cssSelector(StringUtils.remove(locator, "By.cssSelector: ") + ":nth-child(" + index + ")");
         }
@@ -1768,7 +1783,7 @@ public class ExtendedWebElement implements IWebElement {
         if (locator.startsWith("By.IosClassChain: **")) {
         	resBy = MobileBy.iOSClassChain(StringUtils.remove(locator, "By.IosClassChain: ") + "[" + index + "]");
         }
-        
+
         if (locator.startsWith("By.IosNsPredicate: **")) {
         	resBy = MobileBy.iOSNsPredicateString(StringUtils.remove(locator, "By.IosNsPredicate: ") + "[" + index + "]");
         }
@@ -1791,29 +1806,54 @@ public class ExtendedWebElement implements IWebElement {
         ExpectedCondition<?> waitCondition = null;
         switch (loadingStrategy) {
         case BY_PRESENCE: {
-            if (element != null) {
-                waitCondition = ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+            if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+                if (element != null) {
+                    waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+                } else {
+                    waitCondition = ExpectedConditions.presenceOfElementLocated(myBy);
+                }
             } else {
-                waitCondition = ExpectedConditions.presenceOfElementLocated(myBy);
+                if (element != null) {
+                    waitCondition = ExpectedConditions.visibilityOf(element);
+                } else {
+                    waitCondition = ExpectedConditions.presenceOfElementLocated(myBy);
+                }
             }
             break;
         }
         case BY_VISIBILITY: {
-            if (element != null) {
-                waitCondition = ExpectedConditions.and(ExpectedConditions.visibilityOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+            if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+                if (element != null) {
+                    waitCondition = ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(myBy), ExpectedConditions.visibilityOf(element));
+                } else {
+                    waitCondition = ExpectedConditions.visibilityOfElementLocated(myBy);
+                }
             } else {
-                waitCondition = ExpectedConditions.visibilityOfElementLocated(myBy);
+                if (element != null) {
+                    ExpectedConditions.visibilityOf(element);
+                } else {
+                    waitCondition = ExpectedConditions.visibilityOfElementLocated(myBy);
+                }
             }
             break;
         }
         case BY_PRESENCE_OR_VISIBILITY:
-            if (element != null) {
-                waitCondition = ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(myBy),
-                        ExpectedConditions.visibilityOfElementLocated(myBy),
-                        ExpectedConditions.visibilityOf(element));
+            if (Configuration.getPlatform().equalsIgnoreCase("iOS")) {
+                if (element != null) {
+                    waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy),
+                            ExpectedConditions.visibilityOfElementLocated(myBy),
+                            ExpectedConditions.visibilityOf(element));
+                } else {
+                    waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy),
+                            ExpectedConditions.visibilityOfElementLocated(myBy));
+                }
             } else {
-                waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy),
-                        ExpectedConditions.visibilityOfElementLocated(myBy));
+                if (element != null) {
+                    waitCondition = ExpectedConditions.visibilityOf(element);
+                } else {
+                    waitCondition = ExpectedConditions.or(ExpectedConditions.presenceOfElementLocated(myBy),
+                            ExpectedConditions.visibilityOfElementLocated(myBy));
+                }
             }
             break;
         }
