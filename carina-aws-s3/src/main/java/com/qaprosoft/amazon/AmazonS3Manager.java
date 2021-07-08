@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
+import com.amazonaws.SDKGlobalConfiguration;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.services.s3.AmazonS3;
@@ -57,6 +58,8 @@ public class AmazonS3Manager {
 
     public synchronized static AmazonS3Manager getInstance() {
         if (instance == null) {
+            System.setProperty(SDKGlobalConfiguration.ENFORCE_S3_SIGV4_SYSTEM_PROPERTY, "true");
+
             instance = new AmazonS3Manager();
             CryptoTool cryptoTool = new CryptoTool(Configuration.get(Parameter.CRYPTO_KEY_PATH));
             Pattern CRYPTO_PATTERN = Pattern.compile(SpecialKeywords.CRYPT);
