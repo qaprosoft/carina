@@ -26,7 +26,6 @@
 		<commons-httpclient.version>3.1</commons-httpclient.version>
 		<apache-http.version>4.4</apache-http.version>
 		<itext.version>5.5.13.2</itext.version>
-		<reflections.version>0.9.10</reflections.version>
 		<mockito-all.version>1.10.19</mockito-all.version>
 
 	</properties>
@@ -160,17 +159,6 @@
 		<dependency>
 		    <groupId>org.reflections</groupId>
 		    <artifactId>reflections</artifactId>
-			<version>${reflections.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Test utilities -->

@@ -87,6 +87,10 @@ public abstract class AbstractApiMethod extends HttpClient {
 
     @SuppressWarnings({ "rawtypes" })
     private void init(Class clazz) {
+        if (this instanceof BaseApiMethod) {
+            return;
+        }
+
         Endpoint e = this.getClass().getAnnotation(Endpoint.class);
         if (e != null) {
             methodType = e.methodType();
