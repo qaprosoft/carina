@@ -17,16 +17,16 @@ package com.qaprosoft.carina.core.foundation.webdriver;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableMap;
+import io.appium.java_client.AppiumDriver;
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptException;
@@ -45,6 +45,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.json.JsonException;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -121,21 +122,30 @@ public class DriverHelper {
     public void openURL(String url) {
         openURL(url, Configuration.getInt(Parameter.EXPLICIT_TIMEOUT));
     }
-    
+
+
     /**
      * Open URL.
-     * 
+     *
      * @param url
      *            to open.
      * @param timeout
      *            long
      */
     public void openURL(String url, long timeout) {
+        if (SpecialKeywords.ANDROID.equalsIgnoreCase(Configuration.getPlatform())) {
+            openAndroidUrl(url);
+        } else {
+            openDesktopUrl(url, timeout);
+        }
+    }
+
+    private void openDesktopUrl(String url, long timeout){
         final String decryptedURL = getEnvArgURL(cryptoTool.decryptByPattern(url, CRYPTO_PATTERN));
         this.pageURL = decryptedURL;
         WebDriver drv = getDriver();
         DriverListener.setMessages(Messager.OPENED_URL.getMessage(url), Messager.NOT_OPENED_URL.getMessage(url));
-        
+
         // [VD] there is no sense to use fluent wait here as selenium just don't return something until page is ready!
         // explicitly limit time for the openURL operation
         Future<?> future = Executors.newSingleThreadExecutor().submit(new Callable<Void>() {
@@ -171,7 +181,29 @@ public class DriverHelper {
             LOGGER.error(message);
             Assert.fail(message, e);
         } finally {
-            LOGGER.debug("finished driver.get call.");            
+            LOGGER.debug("finished driver.get call.");
+        }
+    }
+
+    private void openAndroidUrl(String url){
+        final String SHELL_OPEN_URL_CMD = "am start -a android.intent.action.VIEW";
+        final String SHELL_INIT_CONSOLE = "mobile: shell";
+
+        LOGGER.info("Following link will be triggered via ADB: " + url);
+        List<String> commands = Arrays.asList((SHELL_OPEN_URL_CMD + " " + url).split(" "));
+
+        String commandKeyWord = commands.get(0);
+        List<String> args = commands.subList(1, commands.size());
+        Map<String, Object> preparedCommand = ImmutableMap.of("command", commandKeyWord, "args", args);
+
+        WebDriver drv = getDriver();
+        if (drv instanceof EventFiringWebDriver) {
+            drv = ((EventFiringWebDriver) drv).getWrappedDriver();
+        }
+
+        String output = (String) ((AppiumDriver<?>) drv).executeScript(SHELL_INIT_CONSOLE, preparedCommand);
+        if (!StringUtils.isEmpty(output)) {
+            LOGGER.debug("ADB command output: " + output);
         }
     }
 
