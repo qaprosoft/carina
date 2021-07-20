@@ -68,7 +68,7 @@ import io.restassured.specification.RequestSpecification;
 
 public abstract class AbstractApiMethod extends HttpClient {
     private static final Logger LOGGER = Logger.getLogger(MethodHandles.lookup().lookupClass());
-    private StringBuilder bodyContent = null;
+    private StringBuilder bodyContent;
     protected String methodPath = null;
     protected HttpMethodType methodType = null;
     protected Object response;

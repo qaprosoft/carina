@@ -5,7 +5,10 @@ import com.qaprosoft.carina.core.foundation.api.annotation.v2.PathVariable;
 import io.restassured.response.Response;
 import javassist.util.proxy.MethodHandler;
 import javassist.util.proxy.ProxyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class ApiMappingPreparator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{(.*?)\\}");
 
@@ -63,7 +68,7 @@ public class ApiMappingPreparator {
 
             return fetchMappingAdapter(thisMethod).map(mappingAdapter -> {
                 if (!(invocationResult instanceof ApiMethodWrapper)) {
-                    throw new RuntimeException("Method " + thisMethod.getName() + " should return instance of " + ApiMethodWrapper.class.getName() + " class");
+                    throw new RuntimeException(String.format("Method %s should return instance of %s class", thisMethod.getName(), ApiMethodWrapper.class.getName()));
                 }
 
                 return mappingAdapter.convert(thisMethod).map(abstractApiMethodV2 -> {
@@ -74,26 +79,26 @@ public class ApiMappingPreparator {
 
                     ApiMethodWrapper apiMethodWrapper = (ApiMethodWrapper) invocationResult;
                     apiMethodWrapper.prepare(apiOpContext);
-                    Response response = abstractApiMethodV2.callAPI();
-                    apiOpContext.setResponse(response);
+                    Response response = apiOpContext.getApiMethod().callAPI();
 
-                    ApiMethodWrapper caller = prepareResultApiMethodCallerInstance(response);
-                    return (Object) caller;
+                    ApiResponseWrapper responseWrapper = new ApiResponseWrapper(response, abstractApiMethodV2);
+                    ApiMethodWrapper wrapper = prepareResultApiMethodWrapperInstance(responseWrapper);
+                    return (Object) wrapper;
                 }).orElse(invocationResult);
             }).orElse(invocationResult);
         };
     }
 
-    private static ApiMethodWrapper prepareResultApiMethodCallerInstance(Response response) {
+    private static ApiMethodWrapper prepareResultApiMethodWrapperInstance(ApiResponseWrapper responseWrapper) {
         return new ApiMethodWrapper() {
             @Override
             public void prepare(ApiOpContext apiOpContext) {
-                System.out.println("already called");
+                LOGGER.info("Api method was already called.");
             }
 
             @Override
-            public Response getResult() {
-                return response;
+            public ApiResponseWrapper getResult() {
+                return responseWrapper;
             }
         };
     }

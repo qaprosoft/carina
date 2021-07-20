@@ -1,13 +1,11 @@
 package com.qaprosoft.carina.core.foundation.api;
 
-import io.restassured.response.Response;
-
 @FunctionalInterface
 public interface ApiMethodWrapper {
 
     void prepare(ApiOpContext apiOpContext);
 
-    default Response getResult() {
+    default ApiResponseWrapper getResult() {
         return null;
     }
 
