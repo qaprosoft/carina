@@ -52,7 +52,7 @@ public class ProxySampleTest implements IAbstractTest {
     @BeforeMethod(alwaysRun = true)
     public void startProxy()
     {
-        R.CONFIG.put("browsermob_proxy", "true");
+        R.CONFIG.put("browserup_proxy", "true");
         getDriver();
         proxy = ProxyPool.getProxy();
         proxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);

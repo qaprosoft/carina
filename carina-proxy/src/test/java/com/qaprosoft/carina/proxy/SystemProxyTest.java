@@ -31,11 +31,10 @@ public class SystemProxyTest {
     public void beforeClass() {
         // do nothing
 
-        R.CONFIG.put("browsermob_proxy", "false");
+        R.CONFIG.put("browserup_proxy", "false");
         R.CONFIG.put("proxy_set_to_system", "true");
         R.CONFIG.put("proxy_host", host);
         R.CONFIG.put(Parameter.PROXY_PORT.getKey(), port);
-
     }
 
     @BeforeMethod

@@ -120,14 +120,14 @@ public abstract class AbstractCapabilities {
     }
 
     protected Proxy setupProxy() {
-        ProxyPool.setupBrowserMobProxy();
+        ProxyPool.setupBrowserUpProxy();
         SystemProxy.setupProxy();
 
         String proxyHost = Configuration.get(Parameter.PROXY_HOST);
         String proxyPort = Configuration.get(Parameter.PROXY_PORT);
         String noProxy = Configuration.get(Parameter.NO_PROXY);
         
-        if (Configuration.get(Parameter.BROWSERMOB_PROXY).equals("true")) {
+        if (Configuration.get(Parameter.BROWSERUP_PROXY).equals("true")) {
             proxyPort = Integer.toString(ProxyPool.getProxyPortFromThread());
         }
         List<String> protocols = Arrays.asList(Configuration.get(Parameter.PROXY_PROTOCOLS).split("[\\s,]+"));

@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.netty.handler.codec.http.HttpResponse;
-import net.lightbody.bmp.filters.ResponseFilter;
-import net.lightbody.bmp.util.HttpMessageContents;
-import net.lightbody.bmp.util.HttpMessageInfo;
+import com.browserup.bup.filters.ResponseFilter;
+import com.browserup.bup.util.HttpMessageContents;
+import com.browserup.bup.util.HttpMessageInfo;
 
 /**
  * Class wrapper for ResponseFilter. Rewrite rules can be configured as separate

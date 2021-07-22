@@ -33,8 +33,8 @@ import com.qaprosoft.carina.core.foundation.utils.R;
 import com.qaprosoft.carina.core.foundation.utils.android.recorder.utils.AdbExecutor;
 import com.qaprosoft.carina.core.foundation.utils.common.CommonUtils;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.BrowserUpProxyServer;
 
 public final class ProxyPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -51,45 +51,45 @@ public final class ProxyPool {
 	}
 	
 	public static void initProxyPortsRange() {
-		if (!Configuration.get(Parameter.BROWSERMOB_PORTS_RANGE).isEmpty()) {
+		if (!Configuration.get(Parameter.BROWSERUP_PORTS_RANGE).isEmpty()) {
 			try {
-				String[] ports = Configuration.get(Parameter.BROWSERMOB_PORTS_RANGE).split(":");
+				String[] ports = Configuration.get(Parameter.BROWSERUP_PORTS_RANGE).split(":");
 				for (int i = Integer.valueOf(ports[0]); i <= Integer.valueOf(ports[1]); i++) {
 					proxyPortsFromRange.put(i, true);
 				}
 			} catch (Exception e) {
-				throw new RuntimeException("Please specify BROWSERMOB_PORTS_RANGE in format 'port_from:port_to'");
+				throw new RuntimeException("Please specify BROWSERUP_PORTS_RANGE in format 'port_from:port_to'");
 			}
 		}
 	}
     
-    // ------------------------- BOWSERMOB PROXY ---------------------
+    // ------------------------- BOWSERUP PROXY ---------------------
     // TODO: investigate possibility to return interface to support JettyProxy
     /**
-     * create BrowserMobProxy Server object
-     * @return BrowserMobProxy
+     * create BrowserUpProxy Server object
+     * @return BrowserUpProxy
      * 
      */
-    public static BrowserMobProxy createProxy() {
-        BrowserMobProxyServer proxy = new BrowserMobProxyServer();
+    public static BrowserUpProxy createProxy() {
+        BrowserUpProxyServer proxy = new BrowserUpProxyServer();
         proxy.setTrustAllServers(true);
         //System.setProperty("jsse.enableSNIExtension", "false");
         
         // disable MITM in case we do not need it
-        proxy.setMitmDisabled(Configuration.getBoolean(Parameter.BROWSERMOB_MITM));
+        proxy.setMitmDisabled(Configuration.getBoolean(Parameter.BROWSERUP_MITM));
         
         return proxy;
     }
     
-    public static void setupBrowserMobProxy()
+    public static void setupBrowserUpProxy()
     {
-        if (Configuration.getBoolean(Parameter.BROWSERMOB_PROXY)) {
+        if (Configuration.getBoolean(Parameter.BROWSERUP_PROXY)) {
             long threadId = Thread.currentThread().getId();
-            BrowserMobProxy proxy = startProxy();
+            BrowserUpProxy proxy = startProxy();
 
             Integer port = proxy.getPort();
             proxyPortsByThread.put(threadId, port);
-            
+
             // reuse "proxy_host" to be able to share valid publicly available host. 
             // it is useful when java and web tests are executed absolutely in different containers/networks. 
             if (Configuration.get(Parameter.PROXY_HOST).isEmpty()) {
@@ -97,9 +97,9 @@ public final class ProxyPool {
             	R.CONFIG.put(Parameter.PROXY_HOST.getKey(), currentIP);
             }
             
-            LOGGER.warn("Set http/https proxy settings only to use with BrowserMobProxy host: " + Configuration.get(Parameter.PROXY_HOST) + "; port: "
+            LOGGER.warn("Set http/https proxy settings only to use with BrowserUpProxy host: " + Configuration.get(Parameter.PROXY_HOST) + "; port: "
                     + proxyPortsByThread.get(threadId));
-            
+
             R.CONFIG.put(Parameter.PROXY_PORT.getKey(), port.toString());
             
             R.CONFIG.put("proxy_protocols", "http,https");
@@ -111,12 +111,12 @@ public final class ProxyPool {
         }
     }
 
-    // https://github.com/lightbody/browsermob-proxy/issues/264 'started' flag is not set to false after stopping BrowserMobProxyServer
-    // Due to the above issue we can't control BrowserMob isRunning state and shouldn't stop it
+    // https://github.com/lightbody/browsermob-proxy/issues/264 'started' flag is not set to false after stopping BrowserUpProxyServer
+    // Due to the above issue we can't control BrowserUp isRunning state and shouldn't stop it
     // TODO: investigate possibility to clean HAR files if necessary
     
     /**
-     * stop BrowserMobProxy Server
+     * stop BrowserUpProxy Server
      * 
      */
     /*
@@ -125,15 +125,15 @@ public final class ProxyPool {
 
         LOGGER.debug("stopProxy starting...");
         if (proxies.containsKey(threadId)) {
-            BrowserMobProxy proxy = proxies.get(threadId);
+            BrowserUpProxy proxy = proxies.get(threadId);
             if (proxy != null) {
                 LOGGER.debug("Found registered proxy by thread: " + threadId);
 
                 if (proxy.isStarted()) {
-                    LOGGER.info("Stopping BrowserMob proxy...");
+                    LOGGER.info("Stopping BrowserUp proxy...");
                     proxy.stop();
                 } else {
-                    LOGGER.info("Stopping BrowserMob proxy skipped as it is not started.");
+                    LOGGER.info("Stopping BrowserUp proxy skipped as it is not started.");
                 }
             }
             proxies.remove(threadId);
@@ -141,52 +141,52 @@ public final class ProxyPool {
         LOGGER.debug("stopProxy finished...");
     }*/
     
-    // ------------------------- BOWSERMOB PROXY ---------------------
+    // ------------------------- BOWSERUP PROXY ---------------------
     
-    private static final ConcurrentHashMap<Long, BrowserMobProxy> proxies = new ConcurrentHashMap<Long, BrowserMobProxy>();
+    private static final ConcurrentHashMap<Long, BrowserUpProxy> proxies = new ConcurrentHashMap<Long, BrowserUpProxy>();
     
     /**
-     * Checking whether BROWSERMOB_PORT is declared. then it will be used as port for browsermob proxy
-     * Otherwise first available port from BROWSERMOB_PORTS_RANGE will be used
+     * Checking whether BROWSERUP_PORT is declared. then it will be used as port for browserup proxy
+     * Otherwise first available port from BROWSERUP_PORTS_RANGE will be used
      * 
      * @return port
      */
 	public static int getProxyPortFromConfig() {
-		if (!Configuration.get(Parameter.BROWSERMOB_PORT).isEmpty())
-			return Configuration.getInt(Parameter.BROWSERMOB_PORT);
-		else if (!Configuration.get(Parameter.BROWSERMOB_PORTS_RANGE).isEmpty()) {
+		if (!Configuration.get(Parameter.BROWSERUP_PORT).isEmpty())
+			return Configuration.getInt(Parameter.BROWSERUP_PORT);
+		else if (!Configuration.get(Parameter.BROWSERUP_PORTS_RANGE).isEmpty()) {
 			for (Map.Entry<Integer, Boolean> pair : proxyPortsFromRange.entrySet()) {
 				if (pair.getValue()) {
-					LOGGER.info("Making BrowserMob proxy port busy: " + pair.getKey());
+					LOGGER.info("Making BrowserUp proxy port busy: " + pair.getKey());
 					pair.setValue(false);
 					return pair.getKey().intValue();
 				}
 			}
 			throw new RuntimeException(
-					"All ports from Parameter.BROWSERMOB_PORTS_RANGE are currently busy. Please change execution thread count");
+					"All ports from Parameter.BROWSERUP_PORTS_RANGE are currently busy. Please change execution thread count");
 		}
 		throw new RuntimeException(
-				"Neither Parameter.BROWSERMOB_PORT nor Parameter.BROWSERMOB_PORTS_RANGE are specified!");
+				"Neither Parameter.BROWSERUP_PORT nor Parameter.BROWSERUP_PORTS_RANGE are specified!");
 	}
 
     // TODO: investigate possibility to return interface to support JettyProxy
     /**
-     * start BrowserMobProxy Server
+     * start BrowserUpProxy Server
      * 
-     * @return BrowserMobProxy
+     * @return BrowserUp Proxy
      * 
      */
-    public static synchronized BrowserMobProxy startProxy() {
+    public static synchronized BrowserUpProxy startProxy() {
         return startProxy(getProxyPortFromConfig());
     }
     
-    public static synchronized BrowserMobProxy startProxy(int proxyPort) {
-        if (!Configuration.getBoolean(Parameter.BROWSERMOB_PROXY)) {
+    public static synchronized BrowserUpProxy startProxy(int proxyPort) {
+        if (!Configuration.getBoolean(Parameter.BROWSERUP_PROXY)) {
             LOGGER.debug("Proxy is disabled.");
             return null;
         }
-        // integrate browserMob proxy if required here
-        BrowserMobProxy proxy = null;
+        // integrate browserup proxy if required here
+        BrowserUpProxy proxy = null;
         long threadId = Thread.currentThread().getId();
         if (proxies.containsKey(threadId)) {
             proxy = proxies.get(threadId);
@@ -203,12 +203,12 @@ public final class ProxyPool {
         }
         
         if (!proxy.isStarted()) {
-            LOGGER.info("Starting BrowserMob proxy...");
+            LOGGER.info("Starting BrowserUp proxy...");
         	// TODO: [VD] confirmed with MB that restart was added just in case. Maybe comment/remove?
             killProcessByPort(proxyPort);
             proxy.start(proxyPort);
         } else {
-            LOGGER.info("BrowserMob proxy is already started on port " + proxy.getPort());
+            LOGGER.info("BrowserUp proxy is already started on port " + proxy.getPort());
         }
 
         return proxy;
@@ -217,19 +217,19 @@ public final class ProxyPool {
     private static void setProxyPortToAvailable(long threadId) {
 		if (proxyPortsByThread.get(threadId) != null) {
 			if (proxyPortsFromRange.get(proxyPortsByThread.get(threadId)) != null) {
-				LOGGER.info("Setting BrowserMob proxy port " + proxyPortsByThread.get(threadId) + " to available state");
+				LOGGER.info("Setting BrowserUp proxy port " + proxyPortsByThread.get(threadId) + " to available state");
 				proxyPortsFromRange.put(proxyPortsByThread.get(threadId), true);
 				proxyPortsByThread.remove(threadId);
 			}
 		}
     }
 
-    // https://github.com/lightbody/browsermob-proxy/issues/264 'started' flag is not set to false after stopping BrowserMobProxyServer
+    // https://github.com/lightbody/browsermob-proxy/issues/264 'started' flag is not set to false after stopping BrowserUpProxyServer
     // Due to the above issue we can't control BrowserMob isRunning state and shouldn't stop it
     // TODO: investigate possibility to clean HAR files if necessary
     
     /**
-     * stop BrowserMobProxy Server
+     * stop BrowserUpProxy Server
      * 
      */
     public static void stopProxy() {
@@ -252,7 +252,7 @@ public final class ProxyPool {
     private static void stopProxyByThread(long threadId) {
         if (proxies.containsKey(threadId)) {
             setProxyPortToAvailable(threadId);
-            BrowserMobProxy proxy = proxies.get(threadId);
+            BrowserUpProxy proxy = proxies.get(threadId);
             if (proxy != null) {
                 LOGGER.debug("Found registered proxy by thread: " + threadId);
 
@@ -274,18 +274,18 @@ public final class ProxyPool {
     }
 
     /**
-     * get registered BrowserMobProxy Server
+     * get registered BrowserUpProxy Server
      * 
-     * @return BrowserMobProxy
+     * @return BrowserUpProxy
      * 
      */
-    public static BrowserMobProxy getProxy() {
-        BrowserMobProxy proxy = null;
+    public static BrowserUpProxy getProxy() {
+        BrowserUpProxy proxy = null;
         long threadId = Thread.currentThread().getId();
         if (proxies.containsKey(threadId)) {
             proxy = proxies.get(threadId);
         } else {
-            Assert.fail("There is not a registered BrowserMobProxy for thread: " + threadId);
+            Assert.fail("There is not a registered BrowserUpProxy for thread: " + threadId);
         }
         return proxy;
     }
@@ -296,7 +296,7 @@ public final class ProxyPool {
         if (proxyPortsByThread.containsKey(threadId)) {
             port = proxyPortsByThread.get(threadId);
         } else {
-            Assert.fail("This is not a register BrowserMobProxy Port for thread: " + threadId);
+            Assert.fail("This is not a register BrowserUpProxy Port for thread: " + threadId);
         }
         return port;
     }
@@ -313,13 +313,13 @@ public final class ProxyPool {
     }
 
     /**
-     * register custom BrowserMobProxy Server
+     * register custom BrowserUpProxy Server
      * 
      * @param proxy
-     *            custom BrowserMobProxy
+     *            custom BrowserUpProxy
      * 
      */
-    public static void registerProxy(BrowserMobProxy proxy) {
+    public static void registerProxy(BrowserUpProxy proxy) {
         long threadId = Thread.currentThread().getId();
         if (proxies.containsKey(threadId)) {
             LOGGER.warn("Existing proxy is detected and will be overrwitten");
@@ -342,7 +342,7 @@ public final class ProxyPool {
      */
     private static void killProcessByPort(int port) {
         if (port == 0) {
-            //do nothing as it is default dynamic browsermob proxy
+            //do nothing as it is default dynamic browserup proxy
             return;
         }
         LOGGER.info(String.format("Process on port %d will be closed.", port));

@@ -86,13 +86,13 @@ public class Configuration {
         
         NO_PROXY("no_proxy"),
 
-        BROWSERMOB_PROXY("browsermob_proxy"),
+        BROWSERUP_PROXY("browserup_proxy"),
 
-        BROWSERMOB_PORT("browsermob_port"),
+        BROWSERUP_PORT("browserup_port"),
 
-        BROWSERMOB_PORTS_RANGE("browsermob_ports_range"),
+        BROWSERUP_PORTS_RANGE("browserup_ports_range"),
 
-        BROWSERMOB_MITM("browsermob_disabled_mitm"),
+        BROWSERUP_MITM("browserup_disabled_mitm"),
 
         PROXY_SET_TO_SYSTEM("proxy_set_to_system"),
 

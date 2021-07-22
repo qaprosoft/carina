@@ -130,18 +130,18 @@ All the project configuration properties are located in a **_config.properties**
 		<td>http, https, ftp, socks</td>
 	</tr>
 		<tr>
-		<td>browsermob_proxy</td>
-		<td>Boolean parameter which enables or disables the automatic BrowserMob proxy launch</td>
+		<td>browserup_proxy</td>
+		<td>Boolean parameter which enables or disables the automatic BrowserUp proxy launch</td>
 		<td>true, false</td>
 	</tr>
 		<tr>
-		<td>browsermob_port</td>
-		<td>Port number for BrowserMob proxy (if nothing or 0 specified, then any free port will be reused)</td>
+		<td>browserup_port</td>
+		<td>Port number for BrowserUp proxy (if nothing or 0 specified, then any free port will be reused)</td>
 		<td>Integer</td>
 	</tr>
 		<tr>
-		<td>browsermob_ports_range</td>
-		<td>Range of ports that will be used for starting of browsermob proxy. First available port from the range will be used. If all ports are used then test will wait for the first freed port.</td>
+		<td>browserup_ports_range</td>
+		<td>Range of ports that will be used for starting of browserup proxy. First available port from the range will be used. If all ports are used then test will wait for the first freed port.</td>
 		<td>8001:8003</td>
 	</tr>
 		<tr>

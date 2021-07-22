@@ -23,20 +23,20 @@ import org.testng.annotations.Test;
 import com.qaprosoft.carina.core.foundation.utils.R;
 import com.qaprosoft.carina.proxy.SystemProxy;
 
-import net.lightbody.bmp.BrowserMobProxy;
+import com.browserup.bup.BrowserUpProxy;
 
-public class BrowserMobPortsRangeTest {
+public class BrowserUpPortsRangeTest {
     private static String header = "my_header";
     private static String headerValue = "my_value";
 
     @BeforeClass(alwaysRun = true)
     public void beforeClass() {
         R.CONFIG.put("core_log_level", "DEBUG");
-        R.CONFIG.put("browsermob_proxy", "true");
+        R.CONFIG.put("browserup_proxy", "true");
         R.CONFIG.put("proxy_set_to_system", "false");
-        R.CONFIG.put("browsermob_port", "NULL");
-        R.CONFIG.put("browsermob_ports_range", "0:0");
-        R.CONFIG.put("browsermob_disabled_mitm", "false");
+        R.CONFIG.put("browserup_port", "NULL");
+        R.CONFIG.put("browserup_ports_range", "0:0");
+        R.CONFIG.put("browserup_disabled_mitm", "false");
     }
 
     @AfterMethod(alwaysRun = true)
@@ -47,15 +47,15 @@ public class BrowserMobPortsRangeTest {
     @Test
     public void testPortsRange() {
         initialize();
-        Assert.assertTrue(ProxyPool.getProxy().isStarted(), "BrowserMobProxy is not started!");
+        Assert.assertTrue(ProxyPool.getProxy().isStarted(), "BrowserUpProxy is not started!");
     }
 
     private void initialize() {
     	ProxyPool.initProxyPortsRange();
-        ProxyPool.setupBrowserMobProxy();
+        ProxyPool.setupBrowserUpProxy();
         SystemProxy.setupProxy();
 
-        BrowserMobProxy proxy = ProxyPool.getProxy();
+        BrowserUpProxy proxy = ProxyPool.getProxy();
         proxy.addHeader(header, headerValue);
     }
 

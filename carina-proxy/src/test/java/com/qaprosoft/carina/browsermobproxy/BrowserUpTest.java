@@ -38,10 +38,10 @@ import com.qaprosoft.carina.core.foundation.utils.Configuration.Parameter;
 import com.qaprosoft.carina.core.foundation.utils.R;
 import com.qaprosoft.carina.proxy.SystemProxy;
 
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.proxy.CaptureType;
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.proxy.CaptureType;
 
-public class BrowserMobTest {
+public class BrowserUpTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private static String header = "my_header";
     private static String headerValue = "my_value";
@@ -52,10 +52,10 @@ public class BrowserMobTest {
     @BeforeClass(alwaysRun = true)
     public void beforeClass() {
         R.CONFIG.put("core_log_level", "DEBUG");
-        R.CONFIG.put("browsermob_proxy", "true");
-        R.CONFIG.put("browsermob_port", "0");
+        R.CONFIG.put("browserup_proxy", "true");
+        R.CONFIG.put("browserup_port", "0");
         R.CONFIG.put("proxy_set_to_system", "true");
-        R.CONFIG.put("browsermob_disabled_mitm", "false");
+        R.CONFIG.put("browserup_disabled_mitm", "false");
     }
 
     @AfterMethod(alwaysRun = true)
@@ -64,20 +64,20 @@ public class BrowserMobTest {
     }
 
     @Test
-    public void testIsBrowserModStarted() {
+    public void testIsBrowserUpStarted() {
         initialize();
-        Assert.assertTrue(ProxyPool.getProxy().isStarted(), "BrowserMobProxy is not started!");
+        Assert.assertTrue(ProxyPool.getProxy().isStarted(), "BrowserUpProxy is not started!");
     }
 
     @Test
-    public void testBrowserModProxySystemIntegration() {
+    public void testBrowserUpProxySystemIntegration() {
         initialize();
         Assert.assertEquals(Configuration.get(Parameter.PROXY_HOST), System.getProperty("http.proxyHost"));
         Assert.assertEquals(Configuration.get(Parameter.PROXY_PORT), System.getProperty("http.proxyPort"));
     }
 
     @Test
-    public void testBrowserModProxyHeader() {
+    public void testBrowserUpProxyHeader() {
         initialize();
         Map<String, String> headers = ProxyPool.getProxy().getAllHeaders();
         Assert.assertTrue(headers.containsKey(header), "There is no custom header: " + header);
@@ -90,8 +90,8 @@ public class BrowserMobTest {
     }
 
     @Test
-    public void testBrowserModProxyRegisteration() {
-        BrowserMobProxy proxy = ProxyPool.startProxy();
+    public void testBrowserUpProxyRegisteration() {
+        BrowserUpProxy proxy = ProxyPool.startProxy();
         ProxyPool.registerProxy(proxy);
         Assert.assertTrue(ProxyPool.isProxyRegistered(), "Proxy wasn't registered in ProxyPool!");
         ProxyPool.stopAllProxies();
@@ -105,9 +105,9 @@ public class BrowserMobTest {
         SSLContext sslContext = localTrustStoreBuilder.createSSLContext();
         SSLContext.setDefault(sslContext);
 
-        ProxyPool.setupBrowserMobProxy();
+        ProxyPool.setupBrowserUpProxy();
         SystemProxy.setupProxy();
-        BrowserMobProxy proxy = ProxyPool.getProxy();
+        BrowserUpProxy proxy = ProxyPool.getProxy();
         proxy.enableHarCaptureTypes(CaptureType.RESPONSE_CONTENT);
         proxy.newHar();
 
@@ -134,10 +134,10 @@ public class BrowserMobTest {
 
     @Test(dataProvider = "dataProviderForMultiThreadProxy")
     public void testRegisterProxy(String arg) {
-        ProxyPool.setupBrowserMobProxy();
+        ProxyPool.setupBrowserUpProxy();
         int tempPort = ProxyPool.getProxy().getPort();
         ProxyPool.stopProxy();
-        BrowserMobProxy proxy = ProxyPool.createProxy();
+        BrowserUpProxy proxy = ProxyPool.createProxy();
         proxy.setTrustAllServers(true);
         proxy.setMitmDisabled(false);
         ProxyPool.registerProxy(proxy);
@@ -149,10 +149,10 @@ public class BrowserMobTest {
     }
 
     private void initialize() {
-        ProxyPool.setupBrowserMobProxy();
+        ProxyPool.setupBrowserUpProxy();
         SystemProxy.setupProxy();
 
-        BrowserMobProxy proxy = ProxyPool.getProxy();
+        BrowserUpProxy proxy = ProxyPool.getProxy();
         proxy.addHeader(header, headerValue);
     }
 

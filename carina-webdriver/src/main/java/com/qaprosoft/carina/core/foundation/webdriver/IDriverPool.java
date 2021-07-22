@@ -388,9 +388,9 @@ public interface IDriverPool {
                     // the test thread
                     device = getDefaultDevice();
                 }
-                
+
                 // moved proxy start logic here since device will be initialized here only
-                if (Configuration.getBoolean(Parameter.BROWSERMOB_PROXY)) {
+                if (Configuration.getBoolean(Parameter.BROWSERUP_PROXY)) {
                     if (!device.isNull()) {
                     	int proxyPort;
                         try {
@@ -405,7 +405,6 @@ public interface IDriverPool {
                     }
                 }
 
-                
                 // new 6.0 approach to manipulate drivers via regular Set
                 CarinaDriver carinaDriver = new CarinaDriver(name, drv, device, TestPhase.getActivePhase(), threadId);
                 driversPool.add(carinaDriver);

@@ -7,8 +7,8 @@
 	<artifactId>carina-proxy</artifactId>
 	<packaging>jar</packaging>
 
-	<name>BrowserMobProxy Core</name>
-	<description>BrowserMob Proxy module web, mobile, API testing.</description>
+	<name>BrowserUpProxy Core</name>
+	<description>BrowserUp Proxy module web, mobile, API testing.</description>
 
 	<parent>
 		<groupId>com.qaprosoft</groupId>
@@ -40,9 +40,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.lightbody.bmp</groupId>
-			<artifactId>browsermob-core</artifactId>
-			<version>2.1.5</version>
+			<groupId>com.browserup</groupId>
+			<artifactId>browserup-proxy-core</artifactId>
+			<version>2.1.2</version>
 		</dependency>
 
 		<dependency>
