@@ -310,3 +310,144 @@ component.assertUIObjectNotPresent();   // equals to Assert.assertTrue(!componen
 ```
 >Dynamic elements loading. 
 **waitForJSToLoad()** method was introduced in AbstractPage class. It uses JS under the hood and helps to wait till all dynamic web elements on the page are getting loaded.
+
+###Tricks
+####Independent tests is the best way for the automation!
+Correct example:
+```
+//Right way to write tests:
+public class WebSampleTest implements IAbstractTest {
+    @Test()
+    public void testCompareModels() {
+	// Open GSM Arena home page and verify page is opened
+	HomePage homePage = new HomePage(getDriver());
+	homePage.open();
+	Assert.assertTrue(homePage.isPageOpened(), "Home page is not opened");
+	// Open model compare page
+	FooterMenu footerMenu = homePage.getFooterMenu();
+	Assert.assertTrue(footerMenu.isUIObjectPresent(2), "Footer menu wasn't found!");
+	CompareModelsPage comparePage = footerMenu.openComparePage();
+	// Compare 3 models
+	List<ModelSpecs> specs = comparePage.compareModels("Samsung Galaxy J3", "Samsung Galaxy J5", "Samsung Galaxy J7 Pro");
+	// Verify model announced dates
+	SoftAssert softAssert = new SoftAssert();
+	softAssert.assertEquals(specs.get(0).readSpec(SpecType.ANNOUNCED), "2016, March 31");
+	softAssert.assertEquals(specs.get(1).readSpec(SpecType.ANNOUNCED), "2015, June 19");
+	softAssert.assertEquals(specs.get(2).readSpec(SpecType.ANNOUNCED), "2017, June");
+	softAssert.assertAll();
+    }
+}
+```
+If there is no way to do so, make sure you use @Test(dependsOnMethods=XXX) tag:
+```
+public class WebSampleSingleDriver implements IAbstractTest {
+    HomePage homePage = null;
+    CompareModelsPage comparePage = null;
+    List<ModelSpecs> specs = new ArrayList<>();
+
+    @BeforeSuite
+    public void startDriver() {
+        // Open GSM Arena home page and verify page is opened
+        homePage = new HomePage(getDriver());
+    }
+    
+    @Test
+    public void testOpenPage() {
+        homePage.open();
+        Assert.assertTrue(homePage.isPageOpened(), "Home page is not opened");
+    }
+    
+    @Test(dependsOnMethods="testOpenPage") //for dependent tests Carina keeps driver sessions by default
+    public void testOpenCompare() {
+        // Open GSM Arena home page and verify page is opened
+        // Open model compare page
+        FooterMenu footerMenu = homePage.getFooterMenu();
+        Assert.assertTrue(footerMenu.isUIObjectPresent(2), "Footer menu wasn't found!");
+        comparePage = footerMenu.openComparePage();
+
+    }
+    
+    @Test(dependsOnMethods="testOpenCompare") //for dependent tests Carina keeps driver sessions by default
+    public void testReadSpecs() {
+        // Compare 3 models
+        specs = comparePage.compareModels("Samsung Galaxy J3", "Samsung Galaxy J5", "Samsung Galaxy J7 Pro");
+    }
+    
+    @Test(dependsOnMethods="testReadSpecs") //for dependent tests Carina keeps driver sessions by default
+    public void testCompareModels() {
+        // Verify model announced dates
+        SoftAssert() softAssert = new SoftAssert();
+        softAssert.assertEquals(specs.get(0).readSpec(SpecType.ANNOUNCED), "2016, March 31");
+        softAssert.assertEquals(specs.get(1).readSpec(SpecType.ANNOUNCED), "2015, June 19");
+        softAssert.assertEquals(specs.get(2).readSpec(SpecType.ANNOUNCED), "2017, June");
+        softAssert.assertAll();
+    }
+}
+```
+#### Operate with web elements in page classes only!
+Correct way:
+```
+//In page class:
+@FindBy(id = "js-lang-list-button")
+private ExtendedWebElement langListBtn;
+    
+@FindBy(xpath = "//div[@id='js-lang-lists']//a")
+private List<ExtendedWebElement> langList;
+
+public WikipediaLocalePage goToWikipediaLocalePage(WebDriver driver) {
+   openLangList();
+   if (!langList.isEmpty()) {
+      for (ExtendedWebElement languageBtn : langList) {
+         String localeStr = Configuration.get(Configuration.Parameter.LOCALE);
+         Locale locale = parseLocale(localeStr);
+         if (languageBtn.getAttribute("lang").equals(locale.getLanguage())) {
+           languageBtn.click();
+           return new WikipediaLocalePage(driver);
+         }
+      }
+   }
+   throw new RuntimeException("No language ref was found");
+}
+
+public void openLangList() {
+   langListBtn.clickIfPresent();
+}
+
+
+//In test class:
+public void someTest() {
+   WikipediaHomePage wikipediaHomePage = new WikipediaHomePage(getDriver());
+   wikipediaHomePage.open();
+   WikipediaLocalePage wikipediaLocalePage = wikipediaHomePage.goToWikipediaLocalePage(getDriver());
+}
+```
+Not like this:
+```
+//In page class:
+@FindBy(id = "js-lang-list-button")
+public ExtendedWebElement langListBtn;
+    
+@FindBy(xpath = "//div[@id='js-lang-lists']//a")
+private List<ExtendedWebElement> langList;
+
+public List<ExtendedWebElement> getLangList(){
+   return langList;
+}
+
+
+//In test class:
+public void someTest() {
+   WikipediaHomePage wikipediaHomePage = new WikipediaHomePage(getDriver());
+   wikipediaHomePage.open();
+   wikipediaHomePage.langListBtn.clickIfPresent();
+   WikipediaLocalePage wikipediaLocalePage = null;
+    for (ExtendedWebElement languageBtn : wikipediaHomePage.getLangList()) {
+         String localeStr = Configuration.get(Configuration.Parameter.LOCALE);
+         Locale locale = parseLocale(localeStr);
+         if (languageBtn.getAttribute("lang").equals(locale.getLanguage())) {
+           languageBtn.click();
+           wikipediaLocalePage = new WikipediaLocalePage(driver);
+         }
+    }
+}
+```

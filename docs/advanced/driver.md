@@ -114,3 +114,40 @@ To disable driver quit strategy completely and cotrol drivers init/quit on your 
 ##Restart
 * **restartDriver()** quit current driver and start new one with the same capabilities
 * **restartDriver(boolean isSameDevice)** quit current driver and start new one on the same device using `uuid` capability. It is fully compatible with [MCloud](https://github.com/zebrunner/mcloud) farm.
+###Tricks
+####Init pages and drivers in places where they are used, 
+Correct way:
+```
+public class TestSample implements IAbstractTest {
+  @Test(){
+  public void someTest(){
+     //Page declared and initialized right before using it
+     HomePage homePage = new HomePage(getDriver());
+     homePage.open();
+     FooterMenu footerMenu = homePage.getFooterMenu();
+     CompareModelsPage comparePage = footerMenu.openComparePage();
+     List<ModelSpecs> specs = comparePage.compareModels("Samsung Galaxy J3", "Samsung Galaxy J5", "Samsung Galaxy J7 Pro");
+  }
+}
+```
+Not like this:
+```
+public class TestSample implements IAbstractTest {
+  HomePage homePage = new HomePage(driver);
+  WebDriver driver;
+  FooterMenu footerMenu;
+  
+  @BeforeSuite
+  public void driverInit(){
+      driver = getDriver();
+  }
+  
+  @Test(){
+  public void someTest(){
+     homePage.open();
+     footerMenu = homePage.getFooterMenu();
+     CompareModelsPage comparePage = footerMenu.openComparePage();
+     List<ModelSpecs> specs = comparePage.compareModels("Samsung Galaxy J3", "Samsung Galaxy J5", "Samsung Galaxy J7 Pro");
+  }
+}
+```
