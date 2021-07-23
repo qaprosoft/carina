@@ -15,12 +15,18 @@
  *******************************************************************************/
 package com.qaprosoft.carina.core.foundation.webdriver;
 
+import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -45,6 +51,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.json.JsonException;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -619,6 +627,70 @@ public class DriverHelper {
 		}
 		return decryptedURL;
 	}
+
+    /**
+     *
+     * @return String saved in clipboard
+     */
+    public String getClipboardText() {
+        String clipboardText = "";
+        try {
+            LOGGER.debug("Trying to get clipboard from remote machine with hub...");
+            String url = getSelenoidClipboardUrl(driver);
+            String username = getField(url, 1);
+            String password = getField(url, 2);
+
+            HttpURLConnection.setFollowRedirects(false);
+            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            con.setRequestMethod("GET");
+
+            if (!username.isEmpty() && !password.isEmpty()) {
+                String usernameColonPassword = username + ":" + password;
+                String basicAuthPayload = "Basic " + Base64.getEncoder().encodeToString(usernameColonPassword.getBytes());
+                con.addRequestProperty("Authorization", basicAuthPayload);
+            }
+
+            int status = con.getResponseCode();
+            if (200 <= status && status <= 299) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer content = new StringBuffer();
+                while ((inputLine = br.readLine()) != null) {
+                    content.append(inputLine);
+                }
+                br.close();
+                clipboardText = content.toString();
+            } else {
+                LOGGER.debug("Trying to get clipboard from local java machine...");
+                clipboardText = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        clipboardText = clipboardText.replaceAll("\n", "");
+        LOGGER.info("Clipboard: " + clipboardText);
+        return clipboardText;
+    }
+
+
+    private String getSelenoidClipboardUrl(WebDriver driver) {
+        String seleniumHost = Configuration.getSeleniumUrl().replace("wd/hub", "clipboard/");
+        if (seleniumHost.isEmpty()){
+            seleniumHost = Configuration.getEnvArg(Parameter.URL.getKey()).replace("wd/hub", "clipboard/");
+        }
+        WebDriver drv = (driver instanceof EventFiringWebDriver) ? ((EventFiringWebDriver) driver).getWrappedDriver() : driver;
+        String sessionId = ((RemoteWebDriver) drv).getSessionId().toString();
+        String url = seleniumHost + sessionId;
+        LOGGER.debug("url: " + url);
+        return url;
+    }
+
+    private String getField(String url, int position) {
+        Pattern pattern = Pattern.compile(".*:\\/\\/(.*):(.*)@");
+        Matcher matcher = pattern.matcher(url);
+
+        return matcher.find() ? matcher.group(position) : "";
+    }
 
     /**
      * Pause for specified timeout.
